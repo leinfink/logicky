@@ -87,6 +87,9 @@ class Formula():
             self.form = wff[1]
             self.subformulas = wff[2]
 
+    def __eq__(self, other):
+        return self.string == other.string
+
     def wellformed(self, s, prepare=False):
         if prepare:
             s = prepare_string(s)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-import syntax
-import validity
+from . import syntax
+from . import validity
 
 import re
 
