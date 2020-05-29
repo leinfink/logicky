@@ -121,7 +121,9 @@ class Tableau(ProofProcedure):
         # applicable_rule is just to aid us
         self.tree = []
 
-    def construct(self, inf: validity.Inference):
+    def construct(self, inf: validity.Inference, full=True):
+        # if full==True, continue a branch even after reaching contradictions
+
         # build initial list
         tree = self.initial_list(inf)
 
@@ -231,8 +233,19 @@ class Tableau(ProofProcedure):
                     branches.append(branch)
         return branches
 
-    def get_tree_as_nested_list(self):
-        pass
+    def get_tree_as_nested_list(self, tree=None, starting_id=0):
+        if tree is None:
+            tree = self.tree
+        tree = tree[starting_id:]
+
+        def get_children(index):
+            subtree = [tree[index].formula.string]
+            for i, n in enumerate(tree[index+1:]):
+                if n.parent_id == index + starting_id:
+                    subtree.append(get_children(i+index+1))
+            return subtree
+
+        return get_children(0)
 
     def print_branches(self, branches=None):
         if branches is None:
@@ -245,9 +258,7 @@ class Tableau(ProofProcedure):
     def print_tree(self, tree=None):
         if tree is None:
             tree = self.tree
-        output = []
-        output.append([(i.formula.string, i.parent_id) for i in tree])
-        return output
+        return ([(i.formula.string, i.parent_id) for i in tree])
 
 
 class Formula(syntax.Formula):
