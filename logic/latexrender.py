@@ -24,11 +24,13 @@ class LatexRenderTableau():
         f = open("latex/template.tex", "r")
         latex_preamble = f.read()
         latex_end = r"\end{document}"
-        f = open("latex/logictex.tex", "w")
+        path = "latex/logictex"
+        f = open(path+".tex", "w")
         f.write(latex_preamble+text+latex_end)
         f.close()
         os.system("pdflatex -output-directory=latex "
-                  "-output-format=pdf latex/logictex.tex ")
+                  f"-output-format=pdf {path}.tex ")
+        return path+".pdf"
 
     def make_tree_string_forest(self,
                                 nested_tree,
