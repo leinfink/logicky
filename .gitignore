@@ -1,1 +1,3 @@
 __pycache__
+/logic/latex/*
+!/logic/latex/template.tex
