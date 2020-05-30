@@ -1,3 +1,6 @@
 __pycache__
 /logic/latex/*
 !/logic/latex/template.tex
+dist/
+build/
+*.egg-info/
