@@ -1,4 +1,13 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
+\documentclass[margin={4mm 1mm 4mm 5mm}, varwidth]{standalone}
+\usepackage[]{forest}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{etoolbox}
+\makeatletter
+% remove the stray space
+\patchcmd{\pgfutilsolvetwotwoleqfloat}
+{ \noexpand\pgfmathfloatdivide@}
+{\noexpand\pgfmathfloatdivide@}
+{}{}
+\makeatother
+\begin{document}
