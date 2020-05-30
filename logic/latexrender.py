@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import CTFLogic
+from . import CTFLogic
 
 import re
 import os
@@ -13,7 +13,7 @@ class LatexRenderTableau():
         self.node_count = 0
         self.show_arrows = True
 
-    def render(self, show_arrows=True):
+    def render(self, path, show_arrows=True):
         self.negatomics = {}
         self.node_count = 0
         self.show_arrows = show_arrows
@@ -21,16 +21,15 @@ class LatexRenderTableau():
         text += self.latex_string_replace(
             self.make_tree_string_forest(self.tree.get_tree_as_nested_list()))
         text += r"\end{forest}"
-        f = open("latex/template.tex", "r")
+        f = open(path+"/template.tex", "r")
         latex_preamble = f.read()
         latex_end = r"\end{document}"
-        path = "latex/logictex"
-        f = open(path+".tex", "w")
+        f = open(path+"output.tex", "w")
         f.write(latex_preamble+text+latex_end)
         f.close()
         os.system("pdflatex -output-directory=latex "
-                  f"-output-format=pdf {path}.tex ")
-        return path+".pdf"
+                  f"-output-format=pdf {path}/output.tex ")
+        return path+"/output.pdf"
 
     def make_tree_string_forest(self,
                                 nested_tree,

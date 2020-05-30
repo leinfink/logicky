@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-from CTFLogic import syntax, deduction
-import latexrender
+from .CTFLogic import syntax, deduction
+from . import latexrender
 
 
-def render_CTF_Tableau_from_strings(prems, concl):
+def render_CTF_Tableau_from_strings(prems, concl, path):
     premisses = []
     for p in prems:
         try:
@@ -22,7 +22,7 @@ def render_CTF_Tableau_from_strings(prems, concl):
     tree.construct(argument)
     valid = argument.is_valid()
     show_arrows = True if valid else False
-    pdfoutputpath = latexrender.LatexRenderTableau(tree).render(show_arrows)
+    pdfoutputpath = latexrender.LatexRenderTableau(tree).render(path, show_arrows)
     return [pdfoutputpath, valid]
 
 
