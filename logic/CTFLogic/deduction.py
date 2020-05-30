@@ -6,7 +6,6 @@ from . import semantics
 from .syntax import Form
 
 from enum import Enum
-import pdb
 
 
 class ProofProcedure():
@@ -121,7 +120,7 @@ class Tableau(ProofProcedure):
         # applicable_rule is just to aid us
         self.tree = []
 
-    def construct(self, inf: validity.Inference, full=True):
+    def construct(self, inf: validity.Inference):
         # if full==True, continue a branch even after reaching contradictions
 
         # build initial list
@@ -134,8 +133,6 @@ class Tableau(ProofProcedure):
                 new_nodes = TableauRules.get_new_nodes(tree[i].formula,
                                                        tree[i].applicable_rule)
                 used_nodes.append(i)
-                # if tree[i].applicable_rule == TableauRules.Rules.BICOND:
-                # pdb.set_trace()
                 branches = self.get_branches(tree, i)
                 for b in branches:
                     start_parent_id = b[-1][1]
@@ -159,21 +156,33 @@ class Tableau(ProofProcedure):
     def proof_valid(self):  # CAREFUL; return True or counterinterpretation
         branches = self.get_branches(self.tree)
         for b in branches:
-            atomics = []
-            branch_closed = False
-            for node in b:
-                if node[0].formula.form == Form.ATOMIC:
-                    atomics.append(node[0].formula)
-            for node in b:
-                formula = node[0].formula
-                if (formula.form == Form.NEGATION and
-                        formula.subformulas[0].form == Form.ATOMIC):
-                    if formula.subformulas[0] in atomics:
-                        branch_closed = True
-                        break
-            if not branch_closed:
-                return self.get_counterinterpretation(b)
+            a = self.branch_closed(b)
+            if a is not True:
+                return a
+            else:
+                continue
         return True
+
+    def branch_closed(self, branch):
+        # CARE: -> True or counterinterpretation
+
+        b = branch
+        atomics = []
+        branch_closed = False
+        for node in b:
+            if node[0].formula.form == Form.ATOMIC:
+                atomics.append(node[0].formula)
+        for node in b:
+            formula = node[0].formula
+            if (formula.form == Form.NEGATION and
+                    formula.subformulas[0].form == Form.ATOMIC):
+                if formula.subformulas[0] in atomics:
+                    branch_closed = True
+                    break
+        if not branch_closed:
+            return self.get_counterinterpretation(b)
+        else:
+            return True
 
     def get_counterinterpretation(self, branch) -> semantics.Interpretation:
         true_atomics = []
@@ -233,14 +242,42 @@ class Tableau(ProofProcedure):
                     branches.append(branch)
         return branches
 
-    def get_tree_as_nested_list(self, tree=None, starting_id=0):
+    def get_tree_as_nested_list(self, tree=None, simplify=True, starting_id=0):
         if tree is None:
             tree = self.tree
         tree = tree[starting_id:]
 
+        if simplify:
+            branches = self.get_branches(tree)
+            for b in branches:
+                atomics = []
+                conatomics = []
+                stop_branch = False
+                for node in b:
+                    if node[0].formula.form == Form.ATOMIC:
+                        if node[0].formula in conatomics:
+                            stop_branch = node[1]
+                            break
+                        atomics.append(node[0].formula)
+                    formula = node[0].formula
+                    if (formula.form == Form.NEGATION and
+                            formula.subformulas[0].form == Form.ATOMIC):
+                        if formula.subformulas[0] in atomics:
+                            stop_branch = node[1]
+                            break
+                        conatomics.append(formula.subformulas[0])
+                if stop_branch:
+                    for i, n in enumerate(tree[stop_branch:]):
+                        if n == []:
+                            continue
+                        if n.parent_id == stop_branch:
+                            tree[i+stop_branch] = []
+
         def get_children(index):
             subtree = [tree[index].formula.string]
             for i, n in enumerate(tree[index+1:]):
+                if n == []:
+                    continue
                 if n.parent_id == index + starting_id:
                     subtree.append(get_children(i+index+1))
             return subtree
