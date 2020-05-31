@@ -42,14 +42,6 @@ class Form(Enum):
     BICONDITIONAL = BICOND
 
 
-def get_form(s):
-    for i in Form:
-        if i._value_ == s:
-            form = i
-            break
-    return form
-
-
 def re_pattern(lookup, anywhere=False):
     con_pattern = "^(" if not anywhere else "("
     for c in lookup[:-1]:
@@ -87,6 +79,13 @@ class Formula():
             self.form = wff[1]
             self.subformulas = wff[2]
 
+    def get_form(self, s):
+        for i in Form:
+            if i._value_ == s:
+                form = i
+                break
+        return form
+
     def __eq__(self, other):
         return self.string == other.string
 
@@ -114,7 +113,7 @@ class Formula():
 
     def get_unary_connective(self, s):
         if re.match(re_pattern(UNARY_CONNECTIVES), s[0]):
-            form = get_form(s[0])
+            form = self.get_form(s[0])
             return (s, form, [Formula(s[1:])])
         else:
             return False
@@ -125,7 +124,7 @@ class Formula():
             left = Formula(connected[0])
             right = Formula(connected[1])
             connector = connected[2]
-            return (s, get_form(connector), [left, right])
+            return (s, self.get_form(connector), [left, right])
         else:
             return False
 

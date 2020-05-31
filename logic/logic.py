@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from .CTFLogic import syntax, deduction
+from CTFLogic import syntax, deduction
 from . import latexrender
 
 
