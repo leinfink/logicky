@@ -62,7 +62,7 @@ def re_pattern(lookup, anywhere=False):
 def prepare_string(s):
     for key, value in variants.items():
         s = re.sub(value, key, s)
-    return s
+    return s.lower()
 
 
 class Error(Exception):

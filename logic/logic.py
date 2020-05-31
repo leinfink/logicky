@@ -23,7 +23,7 @@ def render_CTF_Tableau_from_strings(prems, concl, path):
     valid = argument.is_valid()
     show_arrows = True if valid else False
     pdfoutputpath = latexrender.LatexRenderTableau(tree).render(path, show_arrows)
-    return [pdfoutputpath, valid]
+    return [pdfoutputpath, argument, tree]
 
 
 if __name__ == '__main__':

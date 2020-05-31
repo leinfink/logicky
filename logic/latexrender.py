@@ -3,6 +3,7 @@ from . import CTFLogic
 
 import re
 import os
+from datetime import datetime
 
 
 class LatexRenderTableau():
@@ -25,10 +26,13 @@ class LatexRenderTableau():
         f = open(path+"template.tex", "r")
         latex_preamble = f.read()
         latex_end = r"\end{document}"
+        now = datetime.now()
+        timestamp = str(datetime.timestamp(now))
+        path = path + timestamp
         f = open(path+"output.tex", "w")
         f.write(latex_preamble+text+latex_end)
         f.close()
-        return "output"
+        return timestamp+"output"
 
     def make_tree_string_forest(self,
                                 nested_tree,
