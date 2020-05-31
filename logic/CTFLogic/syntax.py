@@ -4,7 +4,7 @@ import re
 from enum import Enum
 
 # sentence letters / propositional variables
-SENLETTER = "[a-z]"
+SENLETTER = "[a-uw-zA-Z]"  # not v, we will use it as or sign
 ATOMICS = [SENLETTER]
 # parentheses
 LPAREN = "[(]"
@@ -62,7 +62,7 @@ def re_pattern(lookup, anywhere=False):
 def prepare_string(s):
     for key, value in variants.items():
         s = re.sub(value, key, s)
-    return s.lower()
+    return s
 
 
 class Error(Exception):
@@ -93,9 +93,12 @@ class Formula():
     def wellformed(self, s, prepare=False):
         if prepare:
             s = prepare_string(s)
-        if r := (self.get_atomic(s) or
-                 self.get_unary_connective(s) or
-                 self.get_binary_connective(s)):
+        if s == "":
+            raise NotWellFormedFormulaError()
+        r = (self.get_atomic(s) or
+             self.get_unary_connective(s) or
+             self.get_binary_connective(s))
+        if r:
             res = r
         else:
             # is neither a well-formed atomic, nor unary, not binary
@@ -117,7 +120,8 @@ class Formula():
             return False
 
     def get_binary_connective(self, s):
-        if connected := self.find_binary_connector(s):
+        connected = self.find_binary_connector(s)
+        if connected:
             left = Formula(connected[0])
             right = Formula(connected[1])
             connector = connected[2]

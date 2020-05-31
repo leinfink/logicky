@@ -234,10 +234,12 @@ class Tableau(ProofProcedure):
             if not has_children(i):
                 branch = [[node, i+starting_id]]  # [node, index in tree]
                 j = i
-                while a := get_parent(j):
+                a = get_parent(j)
+                while a:
                     # [node, index in tree]
                     branch.insert(0, [a[0], a[1]+starting_id])
                     j = a[1]
+                    a = get_parent(j)
                 if branch[0][0] == tree[0]:
                     branches.append(branch)
         return branches
