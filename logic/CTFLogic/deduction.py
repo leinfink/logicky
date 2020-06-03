@@ -112,6 +112,7 @@ class Tableau(ProofProcedure):
             self.formula: syntax.Formula = formula
             self.parent_id = parent_id
             self.applicable_rule = applicable_rule
+            self.string = self.formula.string
 
     def __init__(self):
         # self.tree is a list containing nodes
@@ -147,10 +148,10 @@ class Tableau(ProofProcedure):
                                              parent_id,
                                              TableauRules.get_rule(new[0]))
                         tree.append(new_node)
-                if i < len(tree)-1:
-                    i += 1
-                else:
-                    i = 0
+            if i < len(tree)-1:
+                i += 1
+            else:
+                i = 0
         self.tree = tree
 
     def proof_valid(self):  # CAREFUL; return True or counterinterpretation

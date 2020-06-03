@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from ..CTFLogic import syntax
+from logic.CTFLogic import syntax
 
 import re
 from enum import Enum
@@ -60,3 +60,21 @@ class KFormula(syntax.Formula):
                 form = i
                 break
         return form
+
+    def negation(self):
+        string = syntax.NOT + self.string
+        form = KForm.NEGATION
+        subformulas = [self]
+        return KFormula(string, form, subformulas)
+
+    def turn_neg_modality(self):
+        if self.subformulas[0].form == KForm.POSSIBLE:
+            string = NEC
+            form = KForm.NECESSARY
+        elif self.subformulas[0].form == KForm.NECESSARY:
+            string = POSS
+            form = KForm.POSSIBLE
+        s_formula = self.subformulas[0].subformulas[0].negation()
+        subformulas = [s_formula]
+        string = string + s_formula.string
+        return KFormula(string, form, subformulas)

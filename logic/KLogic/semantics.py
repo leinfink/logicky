@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from ..CTFLogic import semantics
-from ..CTFLogic import syntax
+from logic.CTFLogic import semantics
+from logic.CTFLogic import syntax
 
 from . import syntax
 

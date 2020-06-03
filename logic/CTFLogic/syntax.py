@@ -28,8 +28,8 @@ variants = {
     NOT: "~",
     AND: "&",
     OR: "v",
-    BICOND: "(<>)|(<->)|(≡)",  # put before COND
-    COND: "(->)|(>)|(⊃)"
+    BICOND: "(<>)|(<->)|(≡)|(⇿)",  # put before COND
+    COND: "(->)|(>)|(⊃)|(⇾)"
 }
 
 
