@@ -63,7 +63,7 @@ if __name__ == '__main__':
     #print(render_K_Tableau_from_strings([], "((◇p&◇~q)->◇◻◇p)", os.getcwd()+"/logic/latex/"))
     #print(render_K_Tableau_from_strings([], "(◻a<->◻(~a->a))", os.getcwd()+"/logic/latex/"))
    # print(render_K_Tableau_from_strings([], "(~◇B->◻(B->A))", os.getcwd()+"/logic/latex/"))
-    print(render_K_Tableau_from_strings(['◻a','◇b'], "◇(a&b)", os.getcwd()+"/logic/latex/"))
+    print(render_K_Tableau_from_strings(['(avb)','<>x','<>b'], "<>d", os.getcwd()+"/logic/latex/"))
 #✸ (A ∧ B) ⊃ ( ✸ A ∧ ✸ B)
 # A ≡  (¬A ⊃ A)
 # ¬ ✸ B ⊃  (B ⊃ A)

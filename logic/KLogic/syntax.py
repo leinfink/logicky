@@ -22,6 +22,17 @@ class KForm(Enum):
     POSSIBLE = POSS
 
 
+variants = {
+    NEC: r"(□)|(\[\])",
+    POSS: "(◇)|(<>)"
+}
+
+def prepare_string(s):
+    for key, value in variants.items():
+        s = re.sub(value, key, s)
+    return s
+
+
 def get_form(s):
     for i in KForm:
         if i._value_ == s:
@@ -31,6 +42,10 @@ def get_form(s):
 
 
 class KFormula(syntax.Formula):
+    def __init__(self, s:str, form=None, subformulas=None):
+        s = prepare_string(s)
+        super().__init__(s, form, subformulas)
+
     def get_atomic(self, s):
         if re.match(syntax.re_pattern(syntax.ATOMICS), s):
             return (s, KForm.ATOMIC, None)

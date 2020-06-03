@@ -109,26 +109,36 @@ class KTableau(deduction.Tableau):
                 else:
                     used_nodes.append(i)
                 is_poss = False
+                is_nec = False
                 if self.tree[i].applicable_rule == KTableauRules.Rules.POSS:
                     is_poss = True
+                if self.tree[i].applicable_rule == KTableauRules.Rules.NEC:
+                    is_nec = True
                 branches = self.get_branches(self.tree, i)
                 for b in branches:
                     start_parent_id = b[-1][1]
                     new_node_ids = []
+                    add_one_for_reasons = False
                     if is_poss:
                         new_world_id = self.tree[i].worldnr
                     for new in new_nodes:
                         if new[1] == 0:
                             parent_id = start_parent_id
+                            if add_one_for_reasons:
+                                parent_id = new_node_ids[0]
+                            print(f'start id: {start_parent_id}')
                         else:
                             try:
                                 parent_id = new_node_ids[new[1]-1]
                             except:
+                                print("huh")
                                 pdb.set_trace()
                         new_node_ids.append(len(self.tree))
+                        #print(new_node_ids)
                         if type(new[0]) == self.KWorldRelationNode:
                             new_node = new[0]
                             new_node.parent_id = parent_id
+                            #print(new_node.parent_id)
                             if is_poss:
                                 used_worlds = []
                                 new_world = new_node.w1 + 1
@@ -148,20 +158,46 @@ class KTableau(deduction.Tableau):
                                 # should actually put this in a .w2 accesssor!
                                 # TODO
                                 new_node.set_string()
+                                #print(new_node.string)
                             for i, v in enumerate(self.tree):
                                 if (v.applicable_rule ==
-                                        KTableauRules.Rules.NEC):
+                                    KTableauRules.Rules.NEC):
                                     if i in used_nodes:
                                         used_nodes.remove(i)
-                                    pdbed = True
+                                        pdbed = True
                         else:
-                            new_node = self.KNode(new[0],
-                                                  parent_id,
-                                                  KTableauRules.get_rule(
-                                                      new[0]), new[2])
+                            if is_nec:
+                                print("alles weird")
+                                print(new[3])
+                                print("und")
+                                print(parent_id)
+                                print(len(self.tree))
+                                if new[3] in self.get_parents_until(parent_id, new[3]):
+                                    # new[3] is the used worldrelation node
+                                    new_node = self.KNode(new[0],
+                                                          parent_id,
+                                                          KTableauRules.get_rule(
+                                                              new[0]), new[2])
+                                    add_one_for_reasons = True
+                                else:
+                                    continue
+                            else:
+                                new_node = self.KNode(new[0],
+                                                      parent_id,
+                                                      KTableauRules.get_rule(
+                                                          new[0]), new[2])
                             if is_poss:
                                 new_node.worldnr = new_world_id
-                        self.tree.append(new_node)
+                        #print(new_node.parent_id)
+                        if type(new_node) == self.KWorldRelationNode:
+                            self.tree.append(self.KWorldRelationNode(new_node.w1, new_node.w2, new_node.parent_id))
+                            self.tree[-1].worldnr = new_node.worldnr
+                        else:
+                            self.tree.append(self.Node(new_node.formula, new_node.parent_id, new_node.applicable_rule))
+                            self.tree[-1].worldnr = new_node.worldnr
+                        #if (new_node.parent_id in [4,6]):
+                            #print([f'{a.string} p:{a.parent_id} {i}' for i,a in enumerate(self.tree)])
+                #print("hi")
             if i < len(self.tree)-1:
                 i += 1
             else:
@@ -205,9 +241,9 @@ class KTableau(deduction.Tableau):
                         #pdb.set_trace()
                         if (index in self.get_parents_until(index2, index) or index2 in self.get_parents_until(index, index2)):
                             new_nodes.append((node.formula.subformulas[0],
-                                              i, node2.w2))
+                                              i, node2.w2, index2)) #index2 for the node of the world relation we used
                             self.used_wr_nodes_for_node[node].append(node2)
-                            i += 1
+                            #i += 1
             return new_nodes
         if r == KTableauRules.Rules.POSS:
             #new_world = node.worldnr + 1
@@ -384,10 +420,11 @@ class KInference(validity.Inference):
 
 
 if __name__ == "__main__":
-    a = syntax.KFormula("(◻(a->b)&◻(b->c))")
+    a = syntax.KFormula("(avb)")
     #b = syntax.KFormula("~(~b->◇◇c)")
     #a = syntax.KFormula("~a")
-    b = syntax.KFormula("(av~b)")
-    c = syntax.KFormula("◻(a->c)")
-    inf = KInference([a], c)
+    b = syntax.KFormula("<>x")
+    d = syntax.KFormula("<>b")
+    c = syntax.KFormula("<>d")
+    inf = KInference([a,b,d], c)
     print(inf.is_valid())
