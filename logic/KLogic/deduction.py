@@ -4,6 +4,8 @@ from enum import Enum
 
 from . import syntax
 from . import semantics
+
+# import superclasses from CTFLogic
 from logic.CTFLogic import deduction, validity
 
 import pdb
@@ -216,7 +218,10 @@ class KTableau(deduction.Tableau):
             #pdb.set_trace()
             last_parent = get_parent(i)
             i = last_parent
-            parents.append(last_parent)
+            if i is None:
+                break
+            else:
+                parents.append(last_parent)
         return parents
 
     def get_new_nodes(self, node, index=None):
@@ -399,6 +404,7 @@ class KTableau(deduction.Tableau):
         def get_children(index):
             if type(tree[index]) == self.KWorldRelationNode:
                 subtree = [(f'{tree[index].w1}r{tree[index].w2}', None)]
+                #subtree = [(f'{tree[index].w1}r{tree[index].w2}', tree[index].worldnr)]
             else:
                 subtree = [(tree[index].formula.string, tree[index].worldnr)]
             for i, n in enumerate(tree[index+1:]):

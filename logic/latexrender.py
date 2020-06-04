@@ -51,6 +51,9 @@ class LatexRenderTableau():
         elif logiccls == 'klogic':
             formulacls = KLogic.syntax.KFormula
             formcls = KLogic.syntax.KForm
+        elif logiccls == 'tlogic':
+            formulacls = KLogic.syntax.KFormula
+            formcls = KLogic.syntax.KForm
         if logiccls == 'ctflogic':
             if not isinstance(nested_tree[0], tuple):
                 nested_tree[0] = (nested_tree[0], None)
@@ -79,7 +82,7 @@ class LatexRenderTableau():
                     if atomic_or_neg:
                         current_branches = []
                         for i, b in enumerate(self.branches):
-                            if logiccls == 'klogic':
+                            if logiccls == 'klogic' or logiccls == 'tlogic':
                                 br = [(node[0].string, node[0].worldnr) for node in b]
                             elif logiccls == 'ctflogic':
                                 br = [(node[0].string, None) for node in b]
@@ -100,41 +103,52 @@ class LatexRenderTableau():
             string += r"]"
         else:
             # string += r"}]"
-            a = formulacls(nested_tree[0][0])
-            if a.form == formcls.NEGATION:
-                formula = a.subformulas[0]
-                othercheck = self.atomics
-            elif a.form == formcls.ATOMIC:
-                formula = a.negation()
-                othercheck = self.negatomics
-            else:
-                # shouldn't happen for valid arguments
-                string += "}]"
-                return string
-            current_branch_id = None
-            for i, b in enumerate(self.branches):
-                #print(b)
-                if logiccls == 'klogic':
-                    br = [(node[0].string, node[0].worldnr) for node in b]
-                elif logiccls == 'ctflogic':
-                    br = [(node[0].string, None) for node in b]
-                if br[:len(abranch)] == abranch:
-                    current_branch_id = i
-                    break
-            # basically another version of the validity check here
-            if (formula.string, current_branch_id, nested_tree[0][1]) in othercheck:
-                string += r"\\[-0.1em]$\times$"
-                string += "}]"
-                if self.show_arrows:
-                    string += r"{\draw[->,dotted] () "
-                    string += r"to[out=west, in=west] ("
-                    # get partner element
-                    string += r"NODE" + str(
-                        othercheck[(formula.string,
-                                    current_branch_id, nested_tree[0][1])])
-                    string += r");}"
-            else:
+            #this try clause catches ending worldrelation nodes
+            # I added it for TLogic
+            # if it breaks something in KLogic, revert it!
+            try:
+                a = formulacls(nested_tree[0][0])
+            except CTFLogic.syntax.NotWellFormedFormulaError:
                 string += r"\\[-0.2em]\scriptsize open}]"
+            else:
+                if a.form == formcls.NEGATION:
+                    formula = a.subformulas[0]
+                    othercheck = self.atomics
+                elif a.form == formcls.ATOMIC:
+                    formula = a.negation()
+                    othercheck = self.negatomics
+                else:
+                    # shouldn't happen for valid arguments
+                    string += "}]"
+                    return string
+                current_branch_id = None
+                for i, b in enumerate(self.branches):
+                    #print(b)
+                    if logiccls == 'klogic' or logiccls == 'tlogic':
+                        br = [(node[0].string, node[0].worldnr) for node in b]
+                    elif logiccls == 'ctflogic':
+                        br = [(node[0].string, None) for node in b]
+                    print(br[:len(abranch)])
+                    print(abranch)
+                    if br[:len(abranch)] == abranch:
+                        current_branch_id = i
+                        break
+                # basically another version of the validity check here
+                if (formula.string, current_branch_id, nested_tree[0][1]) in othercheck:
+                    string += r"\\[-0.1em]$\times$"
+                    string += "}]"
+                    if self.show_arrows:
+                        string += r"{\draw[->,dotted] () "
+                        string += r"to[out=west, in=west] ("
+                        # get partner element
+                        string += r"NODE" + str(
+                            othercheck[(formula.string,
+                                        current_branch_id, nested_tree[0][1])])
+                        string += r");}"
+                else:
+                    #print((formula.string, current_branch_id, nested_tree[0][1]))
+                    #print(othercheck)
+                    string += r"\\[-0.2em]\scriptsize open}]"
         return string
 
     def latex_string_replace(self, string):

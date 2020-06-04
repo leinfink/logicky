@@ -6,6 +6,7 @@ import logic.CTFLogic.deduction as CTFdeduction
 import logic.CTFLogic.syntax as CTFsyntax
 import logic.KLogic.deduction as Kdeduction
 import logic.KLogic.syntax as Ksyntax
+import logic.TLogic.deduction as Tdeduction
 from . import latexrender
 
 
@@ -55,6 +56,30 @@ def render_K_Tableau_from_strings(prems, concl, path):
     return [pdfoutputpath, argument, tree]
 
 
+def render_T_Tableau_from_strings(prems, concl, path):
+    premisses = []
+    for p in prems:
+        try:
+            premisses.append(Ksyntax.KFormula(p))
+        except CTFsyntax.NotWellFormedFormulaError:
+            # shittiest code ever
+            # basically try again with added outer parentheses
+            premisses.append(Ksyntax.KFormula(f'({p})'))
+    try:
+        conclusion = Ksyntax.KFormula(concl)
+    except CTFsyntax.NotWellFormedFormulaError:
+        conclusion = Ksyntax.KFormula(f'({concl})')
+    argument = Tdeduction.TInference(premisses, conclusion)
+    tree = Tdeduction.TTableau()
+    tree.construct(argument)
+    #print([(node[0].string, node[0].worldnr) for node in tree.get_branches(tree.tree)[0]])
+    valid = argument.is_valid()
+    print(valid)
+    show_arrows = True if valid else False
+    pdfoutputpath = latexrender.LatexRenderTableau(tree).render(path, 'tlogic', show_arrows)
+    return [pdfoutputpath, argument, tree]
+
+
 
 if __name__ == '__main__':
     #print(render_CTF_Tableau_from_strings(["((A->B)&(B->C))"], "(A->C)", os.getcwd()+"/logic/latex/"))
@@ -62,8 +87,8 @@ if __name__ == '__main__':
     #print(render_K_Tableau_from_strings([], "(◇(A&B)->(◇A&◇B))", os.getcwd()+"/logic/latex/"))
     #print(render_K_Tableau_from_strings([], "((◇p&◇~q)->◇◻◇p)", os.getcwd()+"/logic/latex/"))
     #print(render_K_Tableau_from_strings([], "(◻a<->◻(~a->a))", os.getcwd()+"/logic/latex/"))
-   # print(render_K_Tableau_from_strings([], "(~◇B->◻(B->A))", os.getcwd()+"/logic/latex/"))
-    print(render_K_Tableau_from_strings(['(avb)','<>x','<>b'], "<>d", os.getcwd()+"/logic/latex/"))
+    print(render_T_Tableau_from_strings([], "([]p->p)", os.getcwd()+"/logic/latex/"))
+    #print(render_T_Tableau_from_strings(['[]a'], "a", os.getcwd()+"/logic/latex/"))
 #✸ (A ∧ B) ⊃ ( ✸ A ∧ ✸ B)
 # A ≡  (¬A ⊃ A)
 # ¬ ✸ B ⊃  (B ⊃ A)
